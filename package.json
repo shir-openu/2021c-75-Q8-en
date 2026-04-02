@@ -1,0 +1,16 @@
+{
+  "name": "2021c-75-q8",
+  "version": "1.0.0",
+  "description": "Digital Friend for ODE Exercise - 2x2 Variable-Coefficient System with Reduction of Order (Exam 2021c-75 Q8)",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "vercel": "^39.0.0"
+  }
+}

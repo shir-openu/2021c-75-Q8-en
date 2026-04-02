@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solving a System of Differential Equations - 2×2 System with Variable Coefficients</title>
+    <style>
+        :root {
+            --bg: #0b1220;
+            --card-bg: #141d2b;
+            --border: #2d3a4f;
+            --ink: #e5e7eb;
+            --teal: #11a8a0;
+            --magenta: #f472b6;
+            --purple: #a78bfa;
+            --green: #22c55e;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --calc-bg: #0c1526;
+            --blue: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 20px;
+            font-size: 1rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--teal);
+            font-size: 1.8rem;
+            font-weight: 400;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--ink);
+            opacity: 0.7;
+            font-size: 1rem;
+        }
+
+        .problem-statement {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--card-bg);
+            border: 2px solid var(--teal);
+            border-radius: 16px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .problem-statement h2 {
+            color: var(--teal);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .problem-math {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2rem;
+            direction: ltr;
+            line-height: 2;
+        }
+
+        .equation-system {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .equation-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Last step (5th) takes full width centered */
+        .container .phase:nth-child(5) {
+            grid-column: 1 / -1;
+            max-width: 680px;
+            justify-self: center;
+            width: 100%;
+        }
+
+        .phase {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            opacity: 0.4;
+            transition: opacity 0.5s ease;
+        }
+
+        .phase.active {
+            opacity: 1;
+        }
+
+        .phase.step1 { border-color: var(--purple); }
+        .phase.step2 { border-color: var(--orange); }
+        .phase.step3 { border-color: var(--green); }
+        .phase.step4 { border-color: var(--blue); }
+        .phase.step5 { border-color: var(--teal); }
+
+        .phase-title {
+            text-align: center;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .phase.step1 .phase-title { color: var(--purple); }
+        .phase.step2 .phase-title { color: var(--orange); }
+        .phase.step3 .phase-title { color: var(--green); }
+        .phase.step4 .phase-title { color: var(--blue); }
+        .phase.step5 .phase-title { color: var(--teal); }
+
+        .phase-description {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .guiding-question {
+            background: rgba(167, 139, 250, 0.1);
+            border: 1px solid var(--purple);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .guiding-question h3 {
+            color: var(--purple);
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+
+        .guiding-question p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .guiding-question .math {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            direction: ltr;
+            margin: 10px 0;
+        }
+
+        /* Input styles */
+        .input-section {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .input-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            direction: ltr;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            margin: 10px 0;
+        }
+
+        .input-row input {
+            width: 80px;
+            height: 38px;
+            text-align: center;
+            font-size: 1rem;
+            font-family: 'Times New Roman', serif;
+            background: var(--calc-bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-row input:focus {
+            border-color: var(--teal);
+        }
+
+        .input-row input.correct {
+            border-color: var(--green);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .input-row input.incorrect {
+            border-color: var(--red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--calc-bg);
+            color: var(--ink);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            border-color: var(--teal);
+            background: rgba(17, 168, 160, 0.2);
+        }
+
+        .control-btn.primary {
+            border-color: var(--green);
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .control-btn.primary:hover {
+            background: rgba(34, 197, 94, 0.4);
+        }
+
+        .control-btn.show-solution {
+            border-color: var(--orange);
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .control-btn.show-solution:hover {
+            background: rgba(245, 158, 11, 0.4);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* DF Button - Digital Friend */
+        .df-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .df-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .df-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .df-icon {
+            font-size: 1.3rem;
+        }
+
+        /* AI Chat Box */
+        .ai-chat-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #1a1f35;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .ai-chat-box.visible {
+            display: block;
+        }
+
+        .ai-chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ai-chat-title {
+            color: #667eea;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-close-btn {
+            background: var(--calc-bg);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .ai-close-btn:hover {
+            border-color: var(--red);
+        }
+
+        .ai-message {
+            margin: 10px 0;
+            padding: 12px;
+            background: var(--calc-bg);
+            border-radius: 8px;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        .ai-message.user {
+            background: rgba(102, 126, 234, 0.2);
+            border-left: 3px solid #667eea;
+        }
+
+        .ai-message.assistant {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid var(--green);
+        }
+
+        .ai-loading {
+            color: var(--ink);
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Solution display */
+        .solution-box {
+            background: var(--calc-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            direction: ltr;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.8;
+            display: none;
+        }
+
+        .solution-box.visible {
+            display: block;
+        }
+
+        .solution-box h4 {
+            color: var(--teal);
+            font-weight: 400;
+            margin-bottom: 10px;
+            text-align: center;
+            direction: ltr;
+        }
+
+        .solution-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .solution-step .label {
+            color: var(--purple);
+            font-size: 1rem;
+            margin-bottom: 5px;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .solution-step .math {
+            font-size: 1.05rem;
+            text-align: center;
+        }
+
+        /* Result highlight */
+        .result-highlight {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--green);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .result-highlight h4 {
+            color: var(--green);
+            margin-bottom: 10px;
+            font-weight: 400;
+        }
+
+        .result-highlight .math {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.15rem;
+            direction: ltr;
+        }
+
+        /* Feedback messages */
+        .feedback {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .feedback.visible {
+            display: block;
+        }
+
+        .feedback.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--green);
+            color: var(--green);
+        }
+
+        .feedback.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--red);
+            color: var(--red);
+        }
+
+        /* Highlight colors */
+        .hl-teal { color: var(--teal); font-weight: 500; }
+        .hl-purple { color: var(--purple); font-weight: 500; }
+        .hl-green { color: var(--green); font-weight: 500; }
+        .hl-orange { color: var(--orange); font-weight: 500; }
+        .hl-blue { color: var(--blue); font-weight: 500; }
+
+        /* Navigation buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: 2px solid var(--teal);
+            border-radius: 10px;
+            background: rgba(17, 168, 160, 0.2);
+            color: var(--ink);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(17, 168, 160, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            color: var(--ink);
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            opacity: 1;
+            border-color: var(--teal);
+            background: rgba(17, 168, 160, 0.2);
+        }
+
+        .progress-step.completed {
+            opacity: 1;
+            border-color: var(--green);
+            background: rgba(34, 197, 94, 0.3);
+            color: var(--green);
+        }
+
+        .progress-connector {
+            width: 40px;
+            height: 2px;
+            background: var(--border);
+            align-self: center;
+        }
+
+        .progress-connector.completed {
+            background: var(--green);
+        }
+
+        /* Method explanation box */
+        .method-box {
+            background: rgba(167, 139, 250, 0.1);
+            border: 1px solid var(--purple);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .method-box h3 {
+            color: var(--purple);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .method-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .container .phase:nth-child(5) {
+                max-width: 100%;
+            }
+        }
+
+        /* Footer */
+        .site-footer {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 13px;
+            color: var(--ink);
+            opacity: 0.7;
+        }
+
+        /* Equation highlight */
+        .eq-highlight {
+            background: rgba(17, 168, 160, 0.15);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* Popup overlay */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .popup-overlay.show {
+            display: flex;
+        }
+        .popup {
+            background: var(--card-bg);
+            border: 2px solid var(--purple);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            direction: ltr;
+        }
+        .popup h2 {
+            margin: 0 0 16px 0;
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: var(--purple);
+            text-align: center;
+        }
+        .popup-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--ink);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            opacity: 0.7;
+        }
+        .popup-close:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Solving a System of Differential Equations</h1>
+    <div class="subtitle">2x2 System — Substitution with Parameters Variation Method</div>
+
+    <!-- Problem Statement -->
+    <div class="problem-statement">
+        <h2>The Problem</h2>
+        <div class="problem-math">
+            <div class="equation-system">
+                <div style="direction: ltr; margin-bottom: 10px;"><strong>Part A</strong> - Find a solution of the homogeneous system with a t<sup>&alpha;</sup> component:</div>
+                <div style="line-height: 2.2;">
+                    dx/dt = (3/t)x &minus; 4ty<br>
+                    dy/dt = (1/t<sup>3</sup>)x + (5/t)y
+                </div>
+                <div style="direction: ltr; margin-top: 15px; margin-bottom: 10px;"><strong>Part B</strong> - Using the solution you found, find all solutions of:</div>
+                <div style="line-height: 2.2;">
+                    dx/dt = (3/t)x &minus; 4ty + 5t<sup>3</sup><br>
+                    dy/dt = (1/t<sup>3</sup>)x + (5/t)y &minus; 4t
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Method explanation -->
+    <div class="method-box">
+        <h3>Solution Method</h3>
+        <p>
+            A system with variable coefficients. We find a homogeneous solution using a power-of-t ansatz,
+            then use reduction of order (change of variables) to find the general solution of the non-homogeneous system.
+        </p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-step active" id="prog1">1</div>
+        <div class="progress-connector" id="conn1"></div>
+        <div class="progress-step" id="prog2">2</div>
+        <div class="progress-connector" id="conn2"></div>
+        <div class="progress-step" id="prog3">3</div>
+        <div class="progress-connector" id="conn3"></div>
+        <div class="progress-step" id="prog4">4</div>
+        <div class="progress-connector" id="conn4"></div>
+        <div class="progress-step" id="prog5">5</div>
+    </div>
+
+    <div class="container">
+        <!-- Step 1: Find Homogeneous Solution (Power Ansatz) -->
+        <div class="phase step1 active" id="phase1">
+            <div class="phase-title">Step 1: Homogeneous Solution - Power Ansatz</div>
+
+            <div class="phase-description">
+                Find a solution of the homogeneous system whose components are powers of t
+            </div>
+
+            <div class="guiding-question">
+                <h3>Guiding Question</h3>
+                <p>Try a solution of the form x(t) = at<sup>&alpha;</sup>, y(t) = bt<sup>&beta;</sup></p>
+                <div class="math">
+                    <span class="eq-highlight">Substitute into the system and find &alpha;, &beta; and the ratio a:b</span>
+                </div>
+                <p style="margin-top: 10px; font-size: 1rem;">Hint: from the equation structure &alpha; = &beta; + 2. Try &beta; = 3</p>
+            </div>
+
+            <div class="input-section">
+                <label>What are the powers and the homogeneous solution?</label>
+                <div class="input-row">
+                    <span>x(t) = at<sup>&alpha;</sup>, &alpha; =</span>
+                    <input type="text" id="alpha-val" placeholder="?">
+                    <span style="margin-left: 20px;">y(t) = bt<sup>&beta;</sup>, &beta; =</span>
+                    <input type="text" id="beta-val" placeholder="?">
+                </div>
+                <div class="input-row" style="margin-top: 10px;">
+                    <span>Homogeneous solution: [a, b]<sup>T</sup> = [</span>
+                    <input type="text" id="hom-a" placeholder="?">
+                    <span>,</span>
+                    <input type="text" id="hom-b" placeholder="?">
+                    <span>]<sup>T</sup></span>
+                </div>
+                <p style="font-size: 1rem; opacity: 0.7; margin-top: 5px;">Enter integers (any scalar multiple is accepted)</p>
+            </div>
+
+            <div class="feedback" id="feedback1"></div>
+
+            <div class="controls">
+                <button class="control-btn primary" id="check1">Check Answer</button>
+                <button class="control-btn show-solution" id="show1">Show Solution</button>
+                <button class="df-btn" id="df1">
+                    <span class="df-icon">&#129488;</span>
+                    <span>Digital Friend</span>
+                </button>
+            </div>
+
+            <!-- AI Chat Box for Step 1 -->
+            <div class="ai-chat-box" id="aiChat1">
+                <div class="ai-chat-header">
+                    <span class="ai-chat-title">
+                        <span>&#129488;</span>
+                        <span>Digital Friend - Step 1</span>
+                    </span>
+                    <button class="ai-close-btn" onclick="closeAIChat(1)">Close &times;</button>
+                </div>
+                <div class="ai-messages" id="aiMessages1"></div>
+            </div>
+
+            <div class="solution-box" id="solution1">
+                <h4>Step 1 Solution</h4>
+                <div class="solution-step">
+                    <div class="label">Ansatz:</div>
+                    <div class="math">x = at<sup>&alpha;</sup>, y = bt<sup>&beta;</sup> with &alpha; = &beta; + 2</div>
+                </div>
+                <div class="result-highlight">
+                    <h4>The Homogeneous Solution</h4>
+                    <div class="math">
+                        <span class="hl-purple">&alpha; = 5, &beta; = 3, [a, b]<sup>T</sup> = [&minus;2, 1]<sup>T</sup></span><br>
+                        <span class="hl-purple">&phi;(t) = [&minus;2t<sup>5</sup>, t<sup>3</sup>]<sup>T</sup></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inline navigation -->
+            <div class="inline-nav" style="text-align: center; margin-top: 20px;">
+                <button class="nav-btn" onclick="showStep(2)">Next Step &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Set Up Substitution -->
+        <div class="phase step2" id="phase2">
+            <div class="phase-title">Step 2: Change of Variables</div>
+
+            <div class="phase-description">
+                Using the homogeneous solution [&minus;2t<sup>5</sup>, t<sup>3</sup>]<sup>T</sup>, define:<br>
+                x = &xi; &minus; 2t<sup>5</sup>&eta;, &nbsp; y = t<sup>3</sup>&eta;<br>
+                Substitute into the non-homogeneous system and derive scalar equations
+            </div>
+
+            <div class="guiding-question">
+                <h3>Guiding Question</h3>
+                <p>After substitution, two scalar equations are obtained. What are the coefficients?</p>
+                <div class="math">
+                    <span class="eq-highlight">d&xi;/dt = (?/t)&middot;&xi; &minus; 3t<sup>3</sup></span><br>
+                    <span class="eq-highlight">d&eta;/dt = t<sup>?</sup>&middot;&xi; &minus; 4t<sup>&minus;2</sup></span>
+                </div>
+                <p style="margin-top: 10px; font-size: 1rem;">Hint: substitute x = &xi; &minus; 2t<sup>5</sup>&eta;, y = t<sup>3</sup>&eta; and simplify</p>
+            </div>
+
+            <div class="input-section">
+                <label>What are the coefficients in the scalar equations?</label>
+                <div class="input-row">
+                    <span>d&xi;/dt = (</span>
+                    <input type="text" id="xi-coeff" placeholder="?">
+                    <span>/t)&middot;&xi; &minus; 3t<sup>3</sup></span>
+                </div>
+                <div class="input-row" style="margin-top: 10px;">
+                    <span>d&eta;/dt = t<sup>(</sup></span>
+                    <input type="text" id="eta-power" placeholder="?">
+                    <span><sup>)</sup>&middot;&xi; &minus; 4t<sup>&minus;2</sup></span>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback2"></div>
+
+            <div class="controls">
+                <button class="control-btn primary" id="check2">Check Answer</button>
+                <button class="control-btn show-solution" id="show2">Show Solution</button>
+                <button class="df-btn" id="df2">
+                    <span class="df-icon">&#129488;</span>
+                    <span>Digital Friend</span>
+                </button>
+            </div>
+
+            <!-- AI Chat Box for Step 2 -->
+            <div class="ai-chat-box" id="aiChat2">
+                <div class="ai-chat-header">
+                    <span class="ai-chat-title">
+                        <span>&#129488;</span>
+                        <span>Digital Friend - Step 2</span>
+                    </span>
+                    <button class="ai-close-btn" onclick="closeAIChat(2)">Close &times;</button>
+                </div>
+                <div class="ai-messages" id="aiMessages2"></div>
+            </div>
+
+            <div class="solution-box" id="solution2">
+                <h4>Step 2 Solution</h4>
+                <div class="solution-step">
+                    <div class="label">The substitution:</div>
+                    <div class="math">x = &xi; &minus; 2t<sup>5</sup>&eta;, &nbsp; y = t<sup>3</sup>&eta;</div>
+                </div>
+                <div class="result-highlight">
+                    <h4>The Scalar Equations</h4>
+                    <div class="math">
+                        <span class="hl-orange">d&xi;/dt = (5/t)&xi; &minus; 3t<sup>3</sup></span><br>
+                        <span class="hl-orange">d&eta;/dt = t<sup>&minus;6</sup>&xi; &minus; 4t<sup>&minus;2</sup></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inline navigation -->
+            <div class="inline-nav" style="text-align: center; margin-top: 20px;">
+                <button class="nav-btn" onclick="showStep(1)" style="margin-right: 10px;">&larr; Previous Step</button>
+                <button class="nav-btn" onclick="showStep(3)">Next Step &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Solve xi equation -->
+        <div class="phase step3" id="phase3">
+            <div class="phase-title">Step 3: Solving the &xi; Equation</div>
+
+            <div class="phase-description">
+                Solve the first-order linear equation:<br>
+                d&xi;/dt &minus; (5/t)&xi; = &minus;3t<sup>3</sup>
+            </div>
+
+            <div class="guiding-question">
+                <h3>Guiding Question</h3>
+                <p>Find an integrating factor and solve. The solution has the form &xi; = c<sub>1</sub>t<sup>4</sup> + At<sup>5</sup></p>
+                <div class="math">
+                    <span class="eq-highlight">&mu; = e<sup>&minus;&int;(5/t)dt</sup> = t<sup>&minus;5</sup></span>
+                </div>
+                <p style="margin-top: 10px; font-size: 1rem;">Hint: multiply by the integrating factor and integrate</p>
+            </div>
+
+            <div class="input-section">
+                <label>What is the coefficient c<sub>1</sub> in &xi; = c<sub>1</sub>t<sup>4</sup> + At<sup>5</sup>?</label>
+                <div class="input-row">
+                    <span>c<sub>1</sub> =</span>
+                    <input type="text" id="c1-val" placeholder="?">
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback3"></div>
+
+            <div class="controls">
+                <button class="control-btn primary" id="check3">Check Answer</button>
+                <button class="control-btn show-solution" id="show3">Show Solution</button>
+                <button class="df-btn" id="df3">
+                    <span class="df-icon">&#129488;</span>
+                    <span>Digital Friend</span>
+                </button>
+            </div>
+
+            <!-- AI Chat Box for Step 3 -->
+            <div class="ai-chat-box" id="aiChat3">
+                <div class="ai-chat-header">
+                    <span class="ai-chat-title">
+                        <span>&#129488;</span>
+                        <span>Digital Friend - Step 3</span>
+                    </span>
+                    <button class="ai-close-btn" onclick="closeAIChat(3)">Close &times;</button>
+                </div>
+                <div class="ai-messages" id="aiMessages3"></div>
+            </div>
+
+            <div class="solution-box" id="solution3">
+                <h4>Step 3 Solution</h4>
+                <div class="solution-step">
+                    <div class="label">The equation:</div>
+                    <div class="math">d&xi;/dt &minus; (5/t)&xi; = &minus;3t<sup>3</sup></div>
+                </div>
+                <div class="solution-step">
+                    <div class="label">Integrating factor:</div>
+                    <div class="math">&mu; = t<sup>&minus;5</sup></div>
+                </div>
+                <div class="result-highlight">
+                    <h4>The Solution</h4>
+                    <div class="math">
+                        <span class="hl-green">&xi; = 3t<sup>4</sup> + At<sup>5</sup></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inline navigation -->
+            <div class="inline-nav" style="text-align: center; margin-top: 20px;">
+                <button class="nav-btn" onclick="showStep(2)" style="margin-right: 10px;">&larr; Previous Step</button>
+                <button class="nav-btn" onclick="showStep(4)">Next Step &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Solve eta equation -->
+        <div class="phase step4" id="phase4">
+            <div class="phase-title">Step 4: Solving the &eta; Equation</div>
+
+            <div class="phase-description">
+                Substitute &xi; = 3t<sup>4</sup> + At<sup>5</sup> into the equation:<br>
+                d&eta;/dt = t<sup>&minus;6</sup>&xi; &minus; 4t<sup>&minus;2</sup>
+            </div>
+
+            <div class="guiding-question">
+                <h3>Guiding Question</h3>
+                <p>Simplify and integrate. The solution has the form &eta; = c<sub>2</sub>t<sup>&minus;1</sup> + A&middot;ln(t) + B</p>
+                <div class="math">
+                    <span class="eq-highlight">d&eta;/dt = &minus;t<sup>&minus;2</sup> + At<sup>&minus;1</sup></span>
+                </div>
+                <p style="margin-top: 10px; font-size: 1rem;">Hint: integrate term by term</p>
+            </div>
+
+            <div class="input-section">
+                <label>What is the coefficient c<sub>2</sub> of t<sup>&minus;1</sup> in the solution?</label>
+                <div class="input-row">
+                    <span>c<sub>2</sub> =</span>
+                    <input type="text" id="c2-val" placeholder="?">
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback4"></div>
+
+            <div class="controls">
+                <button class="control-btn primary" id="check4">Check Answer</button>
+                <button class="control-btn show-solution" id="show4">Show Solution</button>
+                <button class="df-btn" id="df4">
+                    <span class="df-icon">&#129488;</span>
+                    <span>Digital Friend</span>
+                </button>
+            </div>
+
+            <!-- AI Chat Box for Step 4 -->
+            <div class="ai-chat-box" id="aiChat4">
+                <div class="ai-chat-header">
+                    <span class="ai-chat-title">
+                        <span>&#129488;</span>
+                        <span>Digital Friend - Step 4</span>
+                    </span>
+                    <button class="ai-close-btn" onclick="closeAIChat(4)">Close &times;</button>
+                </div>
+                <div class="ai-messages" id="aiMessages4"></div>
+            </div>
+
+            <div class="solution-box" id="solution4">
+                <h4>Step 4 Solution</h4>
+                <div class="solution-step">
+                    <div class="label">Substituting &xi;:</div>
+                    <div class="math">d&eta;/dt = t<sup>&minus;6</sup>(3t<sup>4</sup> + At<sup>5</sup>) &minus; 4t<sup>&minus;2</sup> = &minus;t<sup>&minus;2</sup> + At<sup>&minus;1</sup></div>
+                </div>
+                <div class="solution-step">
+                    <div class="label">Integration:</div>
+                    <div class="math">&eta; = t<sup>&minus;1</sup> + A&middot;ln(t) + B</div>
+                </div>
+                <div class="result-highlight">
+                    <h4>The Solution</h4>
+                    <div class="math">
+                        <span class="hl-blue">&eta; = t<sup>&minus;1</sup> + A&middot;ln(t) + B</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inline navigation -->
+            <div class="inline-nav" style="text-align: center; margin-top: 20px;">
+                <button class="nav-btn" onclick="showStep(3)" style="margin-right: 10px;">&larr; Previous Step</button>
+                <button class="nav-btn" onclick="showStep(5)">Next Step &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 5: General Solution -->
+        <div class="phase step5" id="phase5">
+            <div class="phase-title">Step 5: The General Solution</div>
+
+            <div class="phase-description">
+                Substitute back x = &xi; &minus; 2t<sup>5</sup>&eta;, y = t<sup>3</sup>&eta;<br>
+                Find the particular solution (without constants A and B)
+            </div>
+
+            <div class="guiding-question">
+                <h3>Guiding Question</h3>
+                <p>Substitute &xi; = 3t<sup>4</sup> + At<sup>5</sup> and &eta; = t<sup>&minus;1</sup> + A&middot;ln(t) + B</p>
+                <div class="math">
+                    <span class="eq-highlight">x<sub>p</sub>(t) = t<sup>?</sup>, &nbsp; y<sub>p</sub>(t) = t<sup>?</sup></span>
+                </div>
+                <p style="margin-top: 10px; font-size: 1rem;">Hint: the particular solution is obtained when A = B = 0</p>
+            </div>
+
+            <div class="input-section">
+                <label>What are the powers in the particular solution?</label>
+                <div class="input-row">
+                    <span>x<sub>p</sub>(t) = t<sup>(</sup></span>
+                    <input type="text" id="xp-power" placeholder="?">
+                    <span><sup>)</sup></span>
+                    <span style="margin-left: 20px;">y<sub>p</sub>(t) = t<sup>(</sup></span>
+                    <input type="text" id="yp-power" placeholder="?">
+                    <span><sup>)</sup></span>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback5"></div>
+
+            <div class="controls">
+                <button class="control-btn primary" id="check5">Check Answer</button>
+                <button class="control-btn show-solution" id="show5">Show Solution</button>
+                <button class="df-btn" id="df5">
+                    <span class="df-icon">&#129488;</span>
+                    <span>Digital Friend</span>
+                </button>
+            </div>
+
+            <!-- AI Chat Box for Step 5 -->
+            <div class="ai-chat-box" id="aiChat5">
+                <div class="ai-chat-header">
+                    <span class="ai-chat-title">
+                        <span>&#129488;</span>
+                        <span>Digital Friend - Step 5</span>
+                    </span>
+                    <button class="ai-close-btn" onclick="closeAIChat(5)">Close &times;</button>
+                </div>
+                <div class="ai-messages" id="aiMessages5"></div>
+            </div>
+
+            <div class="solution-box" id="solution5">
+                <h4>Step 5 Solution</h4>
+                <div class="solution-step">
+                    <div class="label">Back-substitution (A=B=0):</div>
+                    <div class="math">x = &xi; &minus; 2t<sup>5</sup>&eta; = 3t<sup>4</sup> &minus; 2t<sup>5</sup>&middot;t<sup>&minus;1</sup> = 3t<sup>4</sup> &minus; 2t<sup>4</sup> = t<sup>4</sup></div>
+                </div>
+                <div class="solution-step">
+                    <div class="label">y component:</div>
+                    <div class="math">y = t<sup>3</sup>&eta; = t<sup>3</sup>&middot;t<sup>&minus;1</sup> = t<sup>2</sup></div>
+                </div>
+                <div class="result-highlight">
+                    <h4>The Particular Solution</h4>
+                    <div class="math">
+                        <span class="hl-teal">x<sub>p</sub>(t) = t<sup>4</sup>, &nbsp; y<sub>p</sub>(t) = t<sup>2</sup></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Answer -->
+            <div class="solution-box" id="final-answer" style="display: none;">
+                <h4>The General Solution</h4>
+                <div class="result-highlight" style="background: rgba(17, 168, 160, 0.15); border-color: var(--teal);">
+                    <div class="math" style="font-size: 1.05rem; line-height: 2;">
+                        x(t) = t<sup>4</sup> + A(t<sup>5</sup> &minus; 2t<sup>5</sup>&middot;ln t) &minus; 2Bt<sup>5</sup><br>
+                        y(t) = t<sup>2</sup> + At<sup>3</sup>&middot;ln t + Bt<sup>3</sup>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inline navigation -->
+            <div class="inline-nav" style="text-align: center; margin-top: 20px;">
+                <button class="nav-btn" onclick="showStep(4)">&larr; Previous Step</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup for Step 1 Solution -->
+    <div class="popup-overlay" id="popup1Overlay">
+        <div class="popup">
+            <button class="popup-close" id="popup1Close">&times;</button>
+            <h2>Step 1 Solution - Homogeneous Solution via Power Ansatz</h2>
+
+            <div class="solution-step">
+                <div class="label">Step a: Guessing the solution form</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    x = at<sup>&alpha;</sup>, &nbsp; y = bt<sup>&beta;</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Step b: Substitution into the first equation</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    &alpha;at<sup>&alpha;&minus;1</sup> = (3/t)(at<sup>&alpha;</sup>) &minus; 4t(bt<sup>&beta;</sup>)<br>
+                    &alpha;at<sup>&alpha;&minus;1</sup> = 3at<sup>&alpha;&minus;1</sup> &minus; 4bt<sup>&beta;+1</sup><br>
+                    Need: &alpha; &minus; 1 = &beta; + 1, so <strong>&alpha; = &beta; + 2</strong>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Step c: Substitution into the second equation (verification)</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    &beta;bt<sup>&beta;&minus;1</sup> = (1/t<sup>3</sup>)(at<sup>&alpha;</sup>) + (5/t)(bt<sup>&beta;</sup>)<br>
+                    Need: &alpha; &minus; 3 = &beta; &minus; 1, so &alpha; = &beta; + 2 &#10003;
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Step d: Choosing &beta; = 3, &alpha; = 5</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    From eq 1: 5a = 3a &minus; 4b &rArr; 2a = &minus;4b &rArr; a = &minus;2b<br>
+                    From eq 2: 3b = a + 5b &rArr; a = &minus;2b &#10003;<br>
+                    Choose b = 1: a = &minus;2
+                </div>
+            </div>
+
+            <div class="result-highlight">
+                <h4>The Homogeneous Solution</h4>
+                <div class="math" style="direction: ltr; font-family: 'Times New Roman', serif; font-size: 1.15rem;">
+                    <span class="hl-purple">&phi;(t) = [&minus;2t<sup>5</sup>, t<sup>3</sup>]<sup>T</sup></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup for Step 2 Solution -->
+    <div class="popup-overlay" id="popup2Overlay">
+        <div class="popup" style="border-color: var(--orange); max-width: 750px;">
+            <button class="popup-close" id="popup2Close">&times;</button>
+            <h2 style="color: var(--orange);">Step 2 Solution - Change of Variables (Reduction of Order)</h2>
+
+            <div class="solution-step">
+                <div class="label">Step a: Defining the substitution</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    x = &xi; &minus; 2t<sup>5</sup>&eta;, &nbsp; y = t<sup>3</sup>&eta;
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Step b: Differentiation using the product rule</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.8;">
+                    dx/dt = d&xi;/dt &minus; 10t<sup>4</sup>&eta; &minus; 2t<sup>5</sup>(d&eta;/dt)<br>
+                    dy/dt = 3t<sup>2</sup>&eta; + t<sup>3</sup>(d&eta;/dt)
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Step c: Substitution into the system and simplification</div>
+                <div class="math" style="direction: ltr; text-align: center; font-size: 1rem; line-height: 1.8;">
+                    After substitution and cancellation of the homogeneous terms (which cancel thanks to the homogeneous solution),<br>
+                    two separate scalar equations are obtained
+                </div>
+            </div>
+
+            <div class="result-highlight">
+                <h4>The Scalar Equations</h4>
+                <div class="math" style="direction: ltr; font-family: 'Times New Roman', serif; font-size: 1.1rem; line-height: 2;">
+                    <span class="hl-orange">d&xi;/dt = (5/t)&xi; &minus; 3t<sup>3</sup></span><br>
+                    <span class="hl-orange">d&eta;/dt = t<sup>&minus;6</sup>&xi; &minus; 4t<sup>&minus;2</sup></span>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Key insight:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-size: 1rem;">
+                    The system "decouples" - first solve the &xi; equation (alone), then substitute &xi; into the &eta; equation.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup for Step 3 Solution -->
+    <div class="popup-overlay" id="popup3Overlay">
+        <div class="popup" style="border-color: var(--green);">
+            <button class="popup-close" id="popup3Close">&times;</button>
+            <h2 style="color: var(--green);">Step 3 Solution - The &xi; Equation</h2>
+
+            <div class="solution-step">
+                <div class="label">The equation:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem;">
+                    d&xi;/dt &minus; (5/t)&xi; = &minus;3t<sup>3</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Integrating factor:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    &mu; = e<sup>&minus;&int;(5/t)dt</sup> = e<sup>&minus;5 ln t</sup> = t<sup>&minus;5</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Multiply by integrating factor:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    d/dt(t<sup>&minus;5</sup>&xi;) = &minus;3t<sup>&minus;2</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Integration:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    t<sup>&minus;5</sup>&xi; = &minus;3 &middot; &int;t<sup>&minus;2</sup>dt = 3t<sup>&minus;1</sup> + A<br>
+                    &xi; = 3t<sup>4</sup> + At<sup>5</sup>
+                </div>
+            </div>
+
+            <div class="result-highlight">
+                <h4>The Solution</h4>
+                <div class="math" style="direction: ltr; font-family: 'Times New Roman', serif; font-size: 1.15rem;">
+                    <span class="hl-green">&xi; = 3t<sup>4</sup> + At<sup>5</sup></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup for Step 4 Solution -->
+    <div class="popup-overlay" id="popup4Overlay">
+        <div class="popup" style="border-color: var(--blue);">
+            <button class="popup-close" id="popup4Close">&times;</button>
+            <h2 style="color: var(--blue);">Step 4 Solution - The &eta; Equation</h2>
+
+            <div class="solution-step">
+                <div class="label">Substituting &xi; into the equation:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    d&eta;/dt = t<sup>&minus;6</sup>(3t<sup>4</sup> + At<sup>5</sup>) &minus; 4t<sup>&minus;2</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Simplification:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    d&eta;/dt = 3t<sup>&minus;2</sup> + At<sup>&minus;1</sup> &minus; 4t<sup>&minus;2</sup><br>
+                    d&eta;/dt = &minus;t<sup>&minus;2</sup> + At<sup>&minus;1</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Term-by-term integration:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.8;">
+                    &eta; = &int;(&minus;t<sup>&minus;2</sup>)dt + A&middot;&int;(t<sup>&minus;1</sup>)dt + B<br>
+                    &eta; = t<sup>&minus;1</sup> + A&middot;ln(t) + B
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Note:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-size: 1rem;">
+                    A is the same constant from the &xi; solution, and B is a new integration constant.
+                </div>
+            </div>
+
+            <div class="result-highlight">
+                <h4>The Solution</h4>
+                <div class="math" style="direction: ltr; font-family: 'Times New Roman', serif; font-size: 1.15rem;">
+                    <span class="hl-blue">&eta; = t<sup>&minus;1</sup> + A&middot;ln(t) + B</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup for Step 5 Solution -->
+    <div class="popup-overlay" id="popup5Overlay">
+        <div class="popup" style="border-color: var(--teal); max-width: 750px;">
+            <button class="popup-close" id="popup5Close">&times;</button>
+            <h2 style="color: var(--teal);">Step 5 Solution - The General Solution</h2>
+
+            <div class="solution-step">
+                <div class="label">Back-substitution for x:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.8;">
+                    x = &xi; &minus; 2t<sup>5</sup>&eta;<br>
+                    = (3t<sup>4</sup> + At<sup>5</sup>) &minus; 2t<sup>5</sup>(t<sup>&minus;1</sup> + A&middot;ln t + B)<br>
+                    = 3t<sup>4</sup> + At<sup>5</sup> &minus; 2t<sup>4</sup> &minus; 2At<sup>5</sup>&middot;ln t &minus; 2Bt<sup>5</sup><br>
+                    = t<sup>4</sup> + A(t<sup>5</sup> &minus; 2t<sup>5</sup>&middot;ln t) &minus; 2Bt<sup>5</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Back-substitution for y:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.8;">
+                    y = t<sup>3</sup>&eta; = t<sup>3</sup>(t<sup>&minus;1</sup> + A&middot;ln t + B)<br>
+                    = t<sup>2</sup> + At<sup>3</sup>&middot;ln t + Bt<sup>3</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">Identifying the particular solution (A=B=0):</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1.05rem;">
+                    x<sub>p</sub>(t) = t<sup>4</sup>, &nbsp; y<sub>p</sub>(t) = t<sup>2</sup>
+                </div>
+            </div>
+
+            <div class="result-highlight" style="background: rgba(17, 168, 160, 0.15); border-color: var(--teal);">
+                <h4 style="color: var(--teal);">The General Solution</h4>
+                <div class="math" style="direction: ltr; font-family: 'Times New Roman', serif; font-size: 1.05rem; line-height: 2;">
+                    x(t) = t<sup>4</sup> + A(t<sup>5</sup> &minus; 2t<sup>5</sup>&middot;ln t) &minus; 2Bt<sup>5</sup><br>
+                    y(t) = t<sup>2</sup> + At<sup>3</sup>&middot;ln t + Bt<sup>3</sup>
+                </div>
+            </div>
+
+            <div class="solution-step">
+                <div class="label">In vector form:</div>
+                <div class="math" style="direction: ltr; text-align: center; font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.8;">
+                    [x(t); y(t)] = [t<sup>4</sup>; t<sup>2</sup>] + A&middot;[t<sup>5</sup>&minus;2t<sup>5</sup>ln t; t<sup>3</sup>ln t] + B&middot;[&minus;2t<sup>5</sup>; t<sup>3</sup>]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Endpoint - Vercel serverless function (will be updated after deployment)
+        const API_ENDPOINT = 'https://2021c-75-q8.vercel.app/api/ai-hint';
+
+        // Conversation history per step
+        const conversationHistory = {
+            1: [],
+            2: [],
+            3: [],
+            4: [],
+            5: []
+        };
+
+        // Problem data for each step
+        const problemData = {
+            1: {
+                correctAnswer: "alpha=5, beta=3, solution=[-2t^5, t^3]^T",
+                fullSolution: "alpha=5, beta=3, [a,b]=[-2,1]\n\nSteps:\n1. Try x=at^alpha, y=bt^beta\n2. From equations: alpha=beta+2\n3. Try beta=3, alpha=5\n4. Get a=-2b, choose b=1: a=-2\n5. Solution: [-2t^5, t^3]^T"
+            },
+            2: {
+                correctAnswer: "xi coefficient = 5, eta power = -6",
+                fullSolution: "dxi/dt = (5/t)*xi - 3t^3\ndeta/dt = t^(-6)*xi - 4t^(-2)\n\nSteps:\n1. Substitution: x = xi - 2t^5*eta, y = t^3*eta\n2. Differentiate using product rule\n3. Substitute into non-homogeneous system\n4. Simplify to get two scalar ODEs"
+            },
+            3: {
+                correctAnswer: "c1 = 3 (xi = 3t^4 + At^5)",
+                fullSolution: "xi = 3t^4 + At^5\n\nSteps:\n1. ODE: dxi/dt - (5/t)xi = -3t^3\n2. Integrating factor: mu = t^(-5)\n3. (t^(-5)*xi)' = -3t^(-2)\n4. Integrate: t^(-5)*xi = 3t^(-1) + A\n5. xi = 3t^4 + At^5"
+            },
+            4: {
+                correctAnswer: "c2 = 1 (coefficient of t^(-1))",
+                fullSolution: "eta = t^(-1) + A*ln(t) + B\n\nSteps:\n1. Substitute xi: deta/dt = t^(-6)(3t^4+At^5) - 4t^(-2)\n2. Simplify: deta/dt = -t^(-2) + At^(-1)\n3. Integrate: eta = t^(-1) + A*ln(t) + B"
+            },
+            5: {
+                correctAnswer: "x_p = t^4, y_p = t^2",
+                fullSolution: "Particular solution: [t^4, t^2]^T\n\nSteps:\n1. x = xi - 2t^5*eta with A=B=0\n2. x = 3t^4 - 2t^5*t^(-1) = 3t^4 - 2t^4 = t^4\n3. y = t^3*t^(-1) = t^2\n4. General solution:\n   x(t) = t^4 + A(t^5-2t^5*ln t) - 2Bt^5\n   y(t) = t^2 + At^3*ln t + Bt^3"
+            }
+        };
+
+        // State
+        let currentStep = 1;
+        const totalSteps = 5;
+        let stepCompleted = [false, false, false, false, false];
+
+        // DOM elements
+        const phases = document.querySelectorAll('.phase');
+        const progressSteps = document.querySelectorAll('.progress-step');
+        const connectors = document.querySelectorAll('.progress-connector');
+
+        // Update UI based on current step
+        function updateUI() {
+            phases.forEach((phase, index) => {
+                if (index + 1 === currentStep) {
+                    phase.classList.add('active');
+                } else {
+                    phase.classList.remove('active');
+                }
+            });
+
+            progressSteps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                } else if (stepCompleted[index]) {
+                    step.classList.add('completed');
+                }
+            });
+
+            connectors.forEach((conn, index) => {
+                if (stepCompleted[index]) {
+                    conn.classList.add('completed');
+                } else {
+                    conn.classList.remove('completed');
+                }
+            });
+        }
+
+        // Show feedback
+        function showFeedback(element, message, isSuccess) {
+            element.textContent = message;
+            element.className = 'feedback visible ' + (isSuccess ? 'success' : 'error');
+        }
+
+        // Normalize answer for comparison
+        function normalize(str) {
+            if (!str) return '';
+            return str.toLowerCase()
+                .replace(/\s+/g, '')
+                .replace(/\*/g, '')
+                .replace(/\^/g, '')
+                .replace(/²/g, '2');
+        }
+
+        // Check if vector is scalar multiple of expected (for Step 1)
+        function checkScalarMultiple(inputs, expected) {
+            const vals = inputs.map(id => parseFloat(document.getElementById(id).value));
+            if (vals.some(isNaN)) return false;
+            if (vals.every(v => v === 0)) return false;
+
+            let ratio = null;
+            for (let i = 0; i < expected.length; i++) {
+                if (expected[i] !== 0) {
+                    ratio = vals[i] / expected[i];
+                    break;
+                }
+            }
+            if (ratio === null || ratio === 0) return false;
+
+            for (let i = 0; i < expected.length; i++) {
+                if (Math.abs(vals[i] - ratio * expected[i]) > 0.001) return false;
+            }
+            return true;
+        }
+
+        // Get user input for current step
+        function getUserInput(step) {
+            if (step === 1) {
+                const a = document.getElementById('alpha-val').value;
+                const b = document.getElementById('beta-val').value;
+                const ha = document.getElementById('hom-a').value;
+                const hb = document.getElementById('hom-b').value;
+                return `alpha=${a}, beta=${b}, [a,b]=[${ha},${hb}]`;
+            } else if (step === 2) {
+                const xc = document.getElementById('xi-coeff').value;
+                const ep = document.getElementById('eta-power').value;
+                return `xi coefficient=${xc}, eta power=${ep}`;
+            } else if (step === 3) {
+                const c1 = document.getElementById('c1-val').value;
+                return `c1=${c1}`;
+            } else if (step === 4) {
+                const c2 = document.getElementById('c2-val').value;
+                return `c2=${c2}`;
+            } else {
+                const xp = document.getElementById('xp-power').value;
+                const yp = document.getElementById('yp-power').value;
+                return `x_p=t^${xp}, y_p=t^${yp}`;
+            }
+        }
+
+        // AI Chat functions
+        async function askDigitalFriend(step) {
+            const userInput = getUserInput(step);
+            const chatBox = document.getElementById(`aiChat${step}`);
+            const messagesDiv = document.getElementById(`aiMessages${step}`);
+
+            chatBox.classList.add('visible');
+
+            messagesDiv.innerHTML += `
+                <div class="ai-message ai-loading">
+                    <div class="spinner"></div>
+                    <span>Processing your answer...</span>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userInput: userInput,
+                        currentStep: step,
+                        problemData: problemData[step],
+                        conversationHistory: conversationHistory[step]
+                    })
+                });
+
+                const data = await response.json();
+
+                const loadingEl = messagesDiv.querySelector('.ai-loading');
+                if (loadingEl) loadingEl.remove();
+
+                if (data.error) {
+                    messagesDiv.innerHTML += `
+                        <div class="ai-message" style="color: var(--red);">
+                            Error: ${data.error}
+                        </div>
+                    `;
+                    return;
+                }
+
+                conversationHistory[step].push({
+                    user: userInput,
+                    ai: data.hint
+                });
+
+                displayConversation(step);
+
+            } catch (error) {
+                const loadingEl = messagesDiv.querySelector('.ai-loading');
+                if (loadingEl) loadingEl.remove();
+
+                messagesDiv.innerHTML += `
+                    <div class="ai-message" style="color: var(--red);">
+                        Cannot connect to the server. Make sure the local server is running.
+                    </div>
+                `;
+                console.error('API Error:', error);
+            }
+        }
+
+        function displayConversation(step) {
+            const messagesDiv = document.getElementById(`aiMessages${step}`);
+            let html = '';
+
+            conversationHistory[step].forEach((turn, i) => {
+                html += `
+                    <div class="ai-message user">
+                        <strong>Attempt #${i + 1}:</strong> ${turn.user}
+                    </div>
+                    <div class="ai-message assistant">
+                        ${turn.ai}
+                    </div>
+                `;
+            });
+
+            messagesDiv.innerHTML = html;
+        }
+
+        function closeAIChat(step) {
+            document.getElementById(`aiChat${step}`).classList.remove('visible');
+        }
+
+        // Check Step 1 (homogeneous solution - powers and vector)
+        document.getElementById('check1').addEventListener('click', () => {
+            const alpha = normalize(document.getElementById('alpha-val').value);
+            const beta = normalize(document.getElementById('beta-val').value);
+            const alphaCorrect = alpha === '5';
+            const betaCorrect = beta === '3';
+            const vectorCorrect = checkScalarMultiple(['hom-a', 'hom-b'], [-2, 1]);
+
+            document.getElementById('alpha-val').className = alphaCorrect ? 'correct' : 'incorrect';
+            document.getElementById('beta-val').className = betaCorrect ? 'correct' : 'incorrect';
+            document.getElementById('hom-a').className = vectorCorrect ? 'correct' : 'incorrect';
+            document.getElementById('hom-b').className = vectorCorrect ? 'correct' : 'incorrect';
+
+            if (alphaCorrect && betaCorrect && vectorCorrect) {
+                showFeedback(document.getElementById('feedback1'), 'Correct! The homogeneous solution is right', true);
+                stepCompleted[0] = true;
+                updateUI();
+            } else if (alphaCorrect && betaCorrect) {
+                showFeedback(document.getElementById('feedback1'), 'The powers are correct! Check the ratio between coefficients a and b', false);
+            } else {
+                showFeedback(document.getElementById('feedback1'), 'Try again - substitute x=at^a, y=bt^b into the system', false);
+            }
+        });
+
+        // Show Step 1 solution in popup
+        const popup1Overlay = document.getElementById('popup1Overlay');
+        const popup1Close = document.getElementById('popup1Close');
+
+        document.getElementById('show1').addEventListener('click', () => {
+            popup1Overlay.classList.add('show');
+            stepCompleted[0] = true;
+            updateUI();
+        });
+
+        popup1Close.addEventListener('click', () => {
+            popup1Overlay.classList.remove('show');
+        });
+
+        popup1Overlay.addEventListener('click', (e) => {
+            if (e.target === popup1Overlay) {
+                popup1Overlay.classList.remove('show');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.popup-overlay').forEach(p => p.classList.remove('show'));
+            }
+        });
+
+        // DF Button Step 1
+        document.getElementById('df1').addEventListener('click', () => askDigitalFriend(1));
+
+        // Check Step 2 (substitution coefficients)
+        document.getElementById('check2').addEventListener('click', () => {
+            const xiCoeff = normalize(document.getElementById('xi-coeff').value);
+            const etaPower = normalize(document.getElementById('eta-power').value);
+
+            const xiCorrect = xiCoeff === '5';
+            const etaCorrect = etaPower === '-6';
+
+            document.getElementById('xi-coeff').className = xiCorrect ? 'correct' : 'incorrect';
+            document.getElementById('eta-power').className = etaCorrect ? 'correct' : 'incorrect';
+
+            if (xiCorrect && etaCorrect) {
+                showFeedback(document.getElementById('feedback2'), 'Correct! The scalar equations are right', true);
+                stepCompleted[1] = true;
+                updateUI();
+            } else {
+                showFeedback(document.getElementById('feedback2'), 'Try again - substitute the change of variables into the system and simplify', false);
+            }
+        });
+
+        // Show Step 2 solution in popup
+        const popup2Overlay = document.getElementById('popup2Overlay');
+        const popup2Close = document.getElementById('popup2Close');
+
+        document.getElementById('show2').addEventListener('click', () => {
+            popup2Overlay.classList.add('show');
+            stepCompleted[1] = true;
+            updateUI();
+        });
+
+        popup2Close.addEventListener('click', () => {
+            popup2Overlay.classList.remove('show');
+        });
+
+        popup2Overlay.addEventListener('click', (e) => {
+            if (e.target === popup2Overlay) {
+                popup2Overlay.classList.remove('show');
+            }
+        });
+
+        // DF Button Step 2
+        document.getElementById('df2').addEventListener('click', () => askDigitalFriend(2));
+
+        // Check Step 3 (xi solution)
+        document.getElementById('check3').addEventListener('click', () => {
+            const c1 = normalize(document.getElementById('c1-val').value);
+            const correct = c1 === '3';
+
+            document.getElementById('c1-val').className = correct ? 'correct' : 'incorrect';
+
+            if (correct) {
+                showFeedback(document.getElementById('feedback3'), 'Correct! xi = 3t^4 + At^5', true);
+                stepCompleted[2] = true;
+                updateUI();
+            } else {
+                showFeedback(document.getElementById('feedback3'), 'Try again - use integrating factor t^(-5)', false);
+            }
+        });
+
+        // Show Step 3 solution in popup
+        const popup3Overlay = document.getElementById('popup3Overlay');
+        const popup3Close = document.getElementById('popup3Close');
+
+        document.getElementById('show3').addEventListener('click', () => {
+            popup3Overlay.classList.add('show');
+            stepCompleted[2] = true;
+            updateUI();
+        });
+
+        popup3Close.addEventListener('click', () => {
+            popup3Overlay.classList.remove('show');
+        });
+
+        popup3Overlay.addEventListener('click', (e) => {
+            if (e.target === popup3Overlay) {
+                popup3Overlay.classList.remove('show');
+            }
+        });
+
+        // DF Button Step 3
+        document.getElementById('df3').addEventListener('click', () => askDigitalFriend(3));
+
+        // Check Step 4 (eta solution)
+        document.getElementById('check4').addEventListener('click', () => {
+            const c2 = normalize(document.getElementById('c2-val').value);
+            const correct = c2 === '1';
+
+            document.getElementById('c2-val').className = correct ? 'correct' : 'incorrect';
+
+            if (correct) {
+                showFeedback(document.getElementById('feedback4'), 'Correct! eta = t^(-1) + A*ln(t) + B', true);
+                stepCompleted[3] = true;
+                updateUI();
+            } else {
+                showFeedback(document.getElementById('feedback4'), 'Try again - substitute xi and integrate', false);
+            }
+        });
+
+        // Show Step 4 solution in popup
+        const popup4Overlay = document.getElementById('popup4Overlay');
+        const popup4Close = document.getElementById('popup4Close');
+
+        document.getElementById('show4').addEventListener('click', () => {
+            popup4Overlay.classList.add('show');
+            stepCompleted[3] = true;
+            updateUI();
+        });
+
+        popup4Close.addEventListener('click', () => {
+            popup4Overlay.classList.remove('show');
+        });
+
+        popup4Overlay.addEventListener('click', (e) => {
+            if (e.target === popup4Overlay) {
+                popup4Overlay.classList.remove('show');
+            }
+        });
+
+        // DF Button Step 4
+        document.getElementById('df4').addEventListener('click', () => askDigitalFriend(4));
+
+        // Check Step 5 (general solution)
+        document.getElementById('check5').addEventListener('click', () => {
+            const xp = normalize(document.getElementById('xp-power').value);
+            const yp = normalize(document.getElementById('yp-power').value);
+
+            const xpCorrect = xp === '4';
+            const ypCorrect = yp === '2';
+
+            document.getElementById('xp-power').className = xpCorrect ? 'correct' : 'incorrect';
+            document.getElementById('yp-power').className = ypCorrect ? 'correct' : 'incorrect';
+
+            if (xpCorrect && ypCorrect) {
+                showFeedback(document.getElementById('feedback5'), 'Excellent! The particular solution is correct. The general solution is shown below.', true);
+                stepCompleted[4] = true;
+                document.getElementById('final-answer').style.display = 'block';
+                updateUI();
+            } else {
+                showFeedback(document.getElementById('feedback5'), 'Try again - set A=B=0 and simplify', false);
+            }
+        });
+
+        // Show Step 5 solution in popup
+        const popup5Overlay = document.getElementById('popup5Overlay');
+        const popup5Close = document.getElementById('popup5Close');
+
+        document.getElementById('show5').addEventListener('click', () => {
+            popup5Overlay.classList.add('show');
+            stepCompleted[4] = true;
+            document.getElementById('final-answer').style.display = 'block';
+            updateUI();
+        });
+
+        popup5Close.addEventListener('click', () => {
+            popup5Overlay.classList.remove('show');
+        });
+
+        popup5Overlay.addEventListener('click', (e) => {
+            if (e.target === popup5Overlay) {
+                popup5Overlay.classList.remove('show');
+            }
+        });
+
+        // DF Button Step 5
+        document.getElementById('df5').addEventListener('click', () => askDigitalFriend(5));
+
+        // Function for inline navigation buttons
+        function showStep(step) {
+            if (step >= 1 && step <= totalSteps) {
+                currentStep = step;
+                updateUI();
+            }
+        }
+
+        // Initialize
+        updateUI();
+    </script>
+
+<footer class="site-footer" dir="ltr">
+  &copy; Developed by Shir Sivroni
+</footer>
+</body>
+</html>
